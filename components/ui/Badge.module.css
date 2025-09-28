@@ -1,0 +1,30 @@
+.base {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+
+.default {
+  background-color: var(--gray-200);
+  color: var(--gray-900);
+}
+
+.success {
+  background-color: var(--success);
+  color: var(--white);
+}
+
+.warning {
+  background-color: var(--warning);
+  color: var(--black);
+}
+
+.error {
+  background-color: var(--danger);
+  color: var(--white);
+}

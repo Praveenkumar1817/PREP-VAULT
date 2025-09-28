@@ -1,0 +1,12 @@
+.card {
+  background-color: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.cardContent {
+  margin-top: 0.5rem;
+  color: var(--gray-700);
+}

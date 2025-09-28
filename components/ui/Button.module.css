@@ -1,0 +1,85 @@
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  min-height: 2.5rem;
+}
+
+.base:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+.primary {
+  background-color: var(--primary);
+  color: var(--white);
+}
+
+.primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.secondary {
+  background-color: var(--gray-200);
+  color: var(--gray-900);
+}
+
+.secondary:hover {
+  background-color: var(--gray-300);
+}
+
+.danger {
+  background-color: var(--danger);
+  color: var(--white);
+}
+
+.danger:hover {
+  background-color: #b91c1c;
+}
+
+.outline {
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+  background-color: transparent;
+}
+
+.outline:hover {
+  background-color: var(--gray-100);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--gray-700);
+  padding: 0.25rem 0.5rem;
+}
+
+.ghost:hover {
+  background-color: var(--gray-200);
+}
+
+.sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  min-height: 2rem;
+}
+
+.md {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  min-height: 2.5rem;
+}
+
+.lg {
+  padding: 0.75rem 1.25rem;
+  font-size: 1.125rem;
+  min-height: 3rem;
+}
+
+.w-full {
+  width: 100%;
+}
