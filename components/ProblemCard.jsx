@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { Badge, Button, Card } from "./ui";
-import { doc, updateDoc } from "firebase/firestore";
-import { db , auth } from "@/firebase";
+import { Badge, Button, Card , CardContent } from "./ui";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { db , auth } from "../src/firebase";
 import styles from "./ProblemCard.module.css";
 
-export default function ProblemCard({ problem, updateStatus }) {
+export default function ProblemCard({ problem, updateStatus, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
     title: problem.title || "",
     difficulty: problem.difficulty || "Easy",
     status: problem.status || "Unsolved",
-    topic: problem.topic || "",
     tags: Array.isArray(problem.tags) ? problem.tags.join(", ") : "",
     url: problem.url || "",
     video: problem.video || "",
@@ -41,7 +40,6 @@ export default function ProblemCard({ problem, updateStatus }) {
         title: formData.title.trim(),
         difficulty: formData.difficulty,
         status: formData.status,
-        topic: formData.topic,
         tags: formData.tags
           ? formData.tags.split(",").map(t => t.trim()).filter(t => t)
           : [],
@@ -90,6 +88,16 @@ export default function ProblemCard({ problem, updateStatus }) {
   // Get current status for display
   const currentStatus = editing ? formData.status : problem.status;
 
+  // Status symbols
+  const getStatusSymbol = (status) => {
+    switch (status) {
+      case "Solved": return "✅";
+      case "Attempted": return "🔄";
+      case "Unsolved": return "❓";
+      default: return "❓";
+    }
+  };
+
   return (
     <Card className={styles.problemCard}>
       {!editing ? (
@@ -104,29 +112,19 @@ export default function ProblemCard({ problem, updateStatus }) {
                   rel="noopener noreferrer" 
                   className={styles.problemTitle}
                 >
-                  {problem.title || "Untitled Problem"}
+                  {problem.title}
                 </a>
               ) : (
-                <span className={styles.problemTitle}>
-                  {problem.title || "Untitled Problem"}
-                </span>
+                <span className={styles.problemTitle}>{problem.title}</span>
               )}
-              {problem.topic && (
-                <Badge variant="default" className={styles.topicBadge}>
-                  {problem.topic}
-                </Badge>
-              )}
-            </div>
-            <div className={styles.statusContainer}>
-              <Badge variant={
-                currentStatus === "Solved" ? "success" : 
-                currentStatus === "Attempted" ? "warning" : "default"
-              }>
-                {currentStatus}
-              </Badge>
               <Badge variant={getDifficultyColor(problem.difficulty)}>
                 {problem.difficulty}
               </Badge>
+            </div>
+            <div className={styles.statusContainer}>
+              <span className={styles.statusSymbol}>
+                {getStatusSymbol(currentStatus)}
+              </span>
             </div>
           </div>
 
@@ -187,6 +185,18 @@ export default function ProblemCard({ problem, updateStatus }) {
                 Edit
               </Button>
             )}
+            {isOwner && onDelete && (
+              <div className={styles.rowDelete}>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => onDelete(problem.id)}
+                  className={styles.deleteButton}
+                >
+                  🗑️
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Status update buttons */}
@@ -198,7 +208,7 @@ export default function ProblemCard({ problem, updateStatus }) {
                 onClick={() => handleStatusUpdate("Solved")}
                 className={styles.statusButton}
               >
-                ✅ Solved
+                ✅
               </Button>
               <Button 
                 size="sm" 
@@ -206,7 +216,7 @@ export default function ProblemCard({ problem, updateStatus }) {
                 onClick={() => handleStatusUpdate("Attempted")}
                 className={styles.statusButton}
               >
-                🔄 Attempted
+                🔄
               </Button>
               <Button 
                 size="sm" 
@@ -214,7 +224,7 @@ export default function ProblemCard({ problem, updateStatus }) {
                 onClick={() => handleStatusUpdate("Unsolved")}
                 className={styles.statusButton}
               >
-                ❓ Unsolved
+                ❓
               </Button>
             </div>
           )}
@@ -248,25 +258,12 @@ export default function ProblemCard({ problem, updateStatus }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Topic</label>
-            <input
-              type="text"
-              className={styles.formInput}
-              value={formData.topic}
-              onChange={(e) => setFormData({...formData, topic: e.target.value})}
-              placeholder="e.g., Graphs, Arrays, Dynamic Programming"
-              disabled={saving}
-            />
-          </div>
-
-          <div className={styles.formGroup}>
             <label className={styles.formLabel}>Tags (comma-separated)</label>
             <input
               type="text"
               className={styles.formInput}
               value={formData.tags}
               onChange={(e) => setFormData({...formData, tags: e.target.value})}
-              placeholder="Array, Two Pointers, Sorting"
               disabled={saving}
             />
           </div>
@@ -274,11 +271,10 @@ export default function ProblemCard({ problem, updateStatus }) {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Problem URL</label>
             <input
-              type="url"
+              type="text"
               className={styles.formInput}
               value={formData.url}
               onChange={(e) => setFormData({...formData, url: e.target.value})}
-              placeholder="https://leetcode.com/problems/example"
               disabled={saving}
             />
           </div>
@@ -286,11 +282,10 @@ export default function ProblemCard({ problem, updateStatus }) {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Video Tutorial URL (optional)</label>
             <input
-              type="url"
+              type="text"
               className={styles.formInput}
               value={formData.video}
               onChange={(e) => setFormData({...formData, video: e.target.value})}
-              placeholder="https://youtube.com/watch?v=example"
               disabled={saving}
             />
           </div>
@@ -298,11 +293,10 @@ export default function ProblemCard({ problem, updateStatus }) {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Editorial URL (optional)</label>
             <input
-              type="url"
+              type="text"
               className={styles.formInput}
               value={formData.editorial}
               onChange={(e) => setFormData({...formData, editorial: e.target.value})}
-              placeholder="https://leetcode.com/problems/example/solution"
               disabled={saving}
             />
           </div>
@@ -313,7 +307,6 @@ export default function ProblemCard({ problem, updateStatus }) {
               className={styles.formTextarea}
               value={formData.notes}
               onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              placeholder="Your approach, key insights, or reminders..."
               disabled={saving}
             />
           </div>
@@ -340,7 +333,6 @@ export default function ProblemCard({ problem, updateStatus }) {
                   title: problem.title || "",
                   difficulty: problem.difficulty || "Easy",
                   status: problem.status || "Unsolved",
-                  topic: problem.topic || "",
                   tags: Array.isArray(problem.tags) ? problem.tags.join(", ") : "",
                   url: problem.url || "",
                   video: problem.video || "",

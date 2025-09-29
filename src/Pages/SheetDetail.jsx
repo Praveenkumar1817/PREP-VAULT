@@ -2,12 +2,16 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db, auth } from "../firebase";
-import { collection, getDocs, query, where, addDoc, updateDoc, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, addDoc, updateDoc,deleteDoc, doc, getDoc } from "firebase/firestore";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
-import { Select } from "../../components/ui/Select";
-import ProblemCard from "../../components/ProblemCard";
 import styles from "./SheetDetail.module.css";
+
+// Helper function to normalize topics
+const normalizeTopic = (topic) => {
+  if (!topic) return "";
+  return topic.trim().charAt(0).toUpperCase() + topic.trim().slice(1).toLowerCase();
+};
 
 export default function SheetDetail() {
   const { sheetId } = useParams();
@@ -35,7 +39,6 @@ export default function SheetDetail() {
       if (!auth.currentUser) return;
 
       try {
-        // Fetch sheet details
         const sheetRef = doc(db, "sheets", sheetId);
         const sheetDocSnap = await getDoc(sheetRef);
         
@@ -46,7 +49,6 @@ export default function SheetDetail() {
         
         setSheet({ id: sheetDocSnap.id, ...sheetDocSnap.data() });
 
-        // Fetch problems for this sheet
         const problemsRef = collection(db, "problems");
         const problemsQuery = query(
           problemsRef,
@@ -90,14 +92,13 @@ export default function SheetDetail() {
         notes: newProblem.notes.trim(),
         user: auth.currentUser.uid,
         sheetId: sheetId,
-        topic: newProblem.topic,
+        topic: newProblem.topic.trim(),
         createdAt: new Date().toISOString()
       };
 
       const docRef = await addDoc(problemsRef, problemData);
       setProblems(prev => [...prev, { id: docRef.id, ...problemData }]);
       
-      // Reset form
       setNewProblem({
         title: "",
         difficulty: "Easy",
@@ -110,6 +111,7 @@ export default function SheetDetail() {
         topic: ""
       });
       setShowAddForm(false);
+      navigate(`/problems/${docRef.id}`); // Navigate to problem detail
     } catch (err) {
       console.error("Error adding problem:", err);
       alert(`Error: ${err.message}`);
@@ -118,18 +120,18 @@ export default function SheetDetail() {
     }
   };
 
-  const updateStatus = async (id, status) => {
-    if (!auth.currentUser) return;
+  const deleteProblem = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this problem?")) {
+      return;
+    }
 
     try {
       const problemDoc = doc(db, "problems", id);
-      await updateDoc(problemDoc, { status });
-      setProblems(problems.map(p => 
-        p.id === id ? { ...p, status } : p
-      ));
+      await deleteDoc(problemDoc);
+      setProblems(problems.filter(p => p.id !== id));
     } catch (err) {
-      console.error("Error updating status:", err);
-      alert(`Failed to update status: ${err.message}`);
+      console.error("Error deleting problem:", err);
+      alert(`Failed to delete problem: ${err.message}`);
     }
   };
 
@@ -138,7 +140,8 @@ export default function SheetDetail() {
     const q = searchTerm.toLowerCase();
     return (
       p.title?.toLowerCase().includes(q) ||
-      (p.tags || []).some((t) => t.toLowerCase().includes(q))
+      (p.tags || []).some((t) => t.toLowerCase().includes(q)) ||
+      (p.topic && p.topic.toLowerCase().includes(q))
     );
   });
 
@@ -146,6 +149,34 @@ export default function SheetDetail() {
   const totalProblems = problems.length;
   const solvedProblems = problems.filter(p => p.status === "Solved").length;
   const progress = totalProblems > 0 ? Math.round((solvedProblems / totalProblems) * 100) : 0;
+
+  // Get topic analytics
+  const getTopicAnalytics = () => {
+    const topicMap = new Map();
+    
+    problems.forEach(problem => {
+      if (problem.topic) {
+        const normalizedTopic = normalizeTopic(problem.topic);
+        if (!topicMap.has(normalizedTopic)) {
+          topicMap.set(normalizedTopic, { total: 0, solved: 0 });
+        }
+        const topicData = topicMap.get(normalizedTopic);
+        topicData.total++;
+        if (problem.status === "Solved") {
+          topicData.solved++;
+        }
+      }
+    });
+    
+    return Array.from(topicMap.entries()).map(([topic, data]) => ({
+      topic,
+      total: data.total,
+      solved: data.solved,
+      percentage: Math.round((data.solved / data.total) * 100)
+    })).sort((a, b) => b.percentage - a.percentage);
+  };
+
+  const topicAnalytics = getTopicAnalytics();
 
   if (!sheet) {
     return <div className={styles.loading}>Loading...</div>;
@@ -233,7 +264,7 @@ export default function SheetDetail() {
 
               <div className={styles.formGroup}>
                 <label>Difficulty</label>
-                <Select
+                <select
                   className={styles.formSelect}
                   value={newProblem.difficulty}
                   onChange={(e) => setNewProblem({ ...newProblem, difficulty: e.target.value })}
@@ -241,14 +272,14 @@ export default function SheetDetail() {
                   <option value="Easy">Easy</option>
                   <option value="Medium">Medium</option>
                   <option value="Hard">Hard</option>
-                </Select>
+                </select>
               </div>
 
               <div className={styles.formGroup}>
                 <label>Topic</label>
                 <Input
                   type="text"
-                  placeholder="e.g., Graphs, Arrays, Dynamic Programming"
+                  placeholder="e.g., Sorting, Arrays, Dynamic Programming"
                   className={styles.formInput}
                   value={newProblem.topic}
                   onChange={(e) => setNewProblem({ ...newProblem, topic: e.target.value })}
@@ -263,38 +294,6 @@ export default function SheetDetail() {
                   className={styles.formInput}
                   value={newProblem.tags}
                   onChange={(e) => setNewProblem({ ...newProblem, tags: e.target.value })}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Video Tutorial (optional)</label>
-                <Input
-                  type="text"
-                  placeholder="YouTube link"
-                  className={styles.formInput}
-                  value={newProblem.video}
-                  onChange={(e) => setNewProblem({ ...newProblem, video: e.target.value })}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Editorial (optional)</label>
-                <Input
-                  type="text"
-                  placeholder="Official solution link"
-                  className={styles.formInput}
-                  value={newProblem.editorial}
-                  onChange={(e) => setNewProblem({ ...newProblem, editorial: e.target.value })}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Notes / Approach (optional)</label>
-                <textarea
-                  placeholder="Your approach, key insights, or reminders..."
-                  className={styles.formTextarea}
-                  value={newProblem.notes}
-                  onChange={(e) => setNewProblem({ ...newProblem, notes: e.target.value })}
                 />
               </div>
 
@@ -318,21 +317,95 @@ export default function SheetDetail() {
         </div>
       )}
 
-      {/* Problem List */}
-      <div className={styles.problemList}>
-        {filteredProblems.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No questions in this sheet yet.</p>
-            <Button onClick={() => setShowAddForm(true)}>
-              Add Your First Question
-            </Button>
-          </div>
+      {/* Topic Analytics */}
+      <div className={styles.analyticsSection}>
+        <h2 className={styles.analyticsTitle}>Topic Analytics</h2>
+        {topicAnalytics.length === 0 ? (
+          <p className={styles.noAnalytics}>No topic data available yet.</p>
         ) : (
-          filteredProblems.map((p) => (
-            <ProblemCard key={p.id} problem={p} updateStatus={updateStatus} />
-          ))
+          <div className={styles.topicGrid}>
+            {topicAnalytics.map((topicData, index) => (
+              <div key={index} className={styles.topicCard}>
+                <div className={styles.topicHeader}>
+                  <h3 className={styles.topicName}>{topicData.topic}</h3>
+                  <span className={styles.topicProgress}>
+                    {topicData.percentage}%
+                  </span>
+                </div>
+                <div className={styles.topicStats}>
+                  <div className={styles.progressBarContainer}>
+                    <div 
+                      className={styles.progressBar}
+                      style={{ width: `${topicData.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className={styles.statsText}>
+                    <span className={styles.solvedCount}>{topicData.solved} solved</span>
+                    <span className={styles.totalCount}>{topicData.total} total</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
+
+      {/* Problem List - Simplified */}
+      <div className={styles.problemListHeader}>
+        <h2 className={styles.problemListTitle}>Questions ({filteredProblems.length})</h2>
+      </div>
+      
+      {filteredProblems.length === 0 ? (
+        <div className={styles.emptyState}>
+          <p>No questions in this sheet yet.</p>
+          <Button onClick={() => setShowAddForm(true)}>
+            Add Your First Question
+          </Button>
+        </div>
+      ) : (
+        <div className={styles.problemGrid}>
+          {filteredProblems.map((p) => (
+            <div key={p.id} className={styles.problemCard}>
+              <div className={styles.problemCardContent}>
+                <div className={styles.problemInfo}>
+                  <h3 className={styles.problemTitle}>
+                    <a 
+                      href={p.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.problemLink}
+                    >
+                      {p.title || "Untitled Problem"}
+                    </a>
+                  </h3>
+                  <div className={styles.problemMeta}>
+                    <span className={styles.topic}>{p.topic || "No topic"}</span>
+                    <span className={`${styles.difficultyBadge} ${p.difficulty.toLowerCase()}`}>
+                      {p.difficulty}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className={styles.problemActions}>
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/problems/${p.id}`)}
+                  >
+                    View Details
+                  </Button>
+                  <button 
+                    className={styles.deleteButton}
+                    onClick={() => deleteProblem(p.id)}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

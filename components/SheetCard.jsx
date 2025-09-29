@@ -5,6 +5,7 @@ import { Card, CardContent } from "./ui/Card";
 import { Button } from "./ui/Button";
 import styles from "./SheetCard.module.css";
 
+
 export default function SheetCard({ sheet, problemCount, solvedCount, onDelete }) {
   const progress = problemCount > 0 ? Math.round((solvedCount / problemCount) * 100) : 0;
   
@@ -18,9 +19,7 @@ export default function SheetCard({ sheet, problemCount, solvedCount, onDelete }
       <CardContent>
         <div className={styles.sheetHeader}>
           <h3 className={styles.sheetTitle}>{sheet.name}</h3>
-          {sheet.description && (
-            <p className={styles.sheetDescription}>{sheet.description}</p>
-          )}
+          <p className={styles.sheetDescription}>{sheet.description || "\u00A0"}</p> {/* Non-breaking space for empty description */}
         </div>
         
         <div className={styles.sheetStats}>

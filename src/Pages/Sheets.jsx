@@ -6,10 +6,14 @@ import { collection, getDocs, query, where, addDoc, deleteDoc, doc } from "fireb
 import { Button } from "../../components/ui/Button";
 import SheetCard from "../../components/SheetCard";
 import styles from "./Sheets.module.css";
+import { Input } from "../../components/ui/Input";
+import { Textarea } from "../../components/ui/Textarea";
 
 export default function Sheets() {
   const [sheets, setSheets] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newSheet, setNewSheet] = useState({ name: "", description: "" });
 
   // Fetch sheets and calculate stats
   useEffect(() => {
@@ -68,17 +72,17 @@ export default function Sheets() {
   }, []);
 
   const createSheet = async () => {
-    const name = prompt("Enter sheet name:");
-    if (!name) return;
+    if (!newSheet.name.trim()) {
+      alert("Please enter a sheet name");
+      return;
+    }
 
-    const description = prompt("Enter sheet description (optional):") || "";
-    
     setLoading(true);
     try {
       const sheetsRef = collection(db, "sheets");
       const sheetData = {
-        name: name.trim(),
-        description: description.trim(),
+        name: newSheet.name.trim(),
+        description: newSheet.description.trim(),
         user: auth.currentUser.uid,
         createdAt: new Date().toISOString()
       };
@@ -87,6 +91,8 @@ export default function Sheets() {
       const newSheetObj = { id: docRef.id, ...sheetData, problemCount: 0, solvedCount: 0 };
       
       setSheets(prev => [...prev, newSheetObj]);
+      setShowCreateModal(false);
+      setNewSheet({ name: "", description: "" });
     } catch (err) {
       console.error("Error creating sheet:", err);
       alert(`Error: ${err.message}`);
@@ -130,7 +136,7 @@ export default function Sheets() {
     <div className={styles.sheetsPage}>
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>Custom Sheets</h1>
-        <Button onClick={createSheet} className={styles.createButton}>
+        <Button onClick={() => setShowCreateModal(true)} className={styles.createButton}>
           + Create New Sheet
         </Button>
       </div>
@@ -140,7 +146,7 @@ export default function Sheets() {
       ) : sheets.length === 0 ? (
         <div className={styles.emptyState}>
           <p>You haven't created any sheets yet.</p>
-          <Button onClick={createSheet}>
+          <Button onClick={() => setShowCreateModal(true)}>
             Create Your First Sheet
           </Button>
         </div>
@@ -155,6 +161,58 @@ export default function Sheets() {
               onDelete={deleteSheet}
             />
           ))}
+        </div>
+      )}
+
+      {/* Create Sheet Modal */}
+      {showCreateModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Create New Sheet</h2>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setShowCreateModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={styles.form}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Sheet Name *</label>
+                <Input
+                  type="text"
+                  value={newSheet.name}
+                  onChange={(e) => setNewSheet({...newSheet, name: e.target.value})}
+                  placeholder="e.g., Array Problems"
+                  className={styles.input}
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Description (optional)</label>
+                <Textarea
+                  value={newSheet.description}
+                  onChange={(e) => setNewSheet({...newSheet, description: e.target.value})}
+                  className={styles.textarea}
+                  placeholder="Brief description of this sheet..."
+                />
+              </div>
+
+              <div className={styles.formActions}>
+                <Button onClick={createSheet} disabled={loading}>
+                  {loading ? "Creating..." : "Create Sheet"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

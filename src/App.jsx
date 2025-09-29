@@ -6,8 +6,12 @@ import Home from './Pages/Home';
 import Sheets from './Pages/Sheets';
 import SheetDetail from './Pages/SheetDetail';
 import Analytics from './Pages/Analytics';
+import Problems from './Pages/Problems';
 import LoginForm from './Pages/LoginForm';
 import RegisterForm from './Pages/RegisterForm';
+import PrivateRoute from '../components/PrivateRoute';
+import { AuthProvider } from './context/AuthContext';
+import ProblemDetail from './Pages/ProblemDetail';
 
 function App() {
   return (
@@ -36,6 +40,14 @@ function App() {
           element={
             <Layout>
               <SheetDetail />
+            </Layout>
+          } 
+        />
+        <Route 
+          path="/problems/:problemId" 
+          element={
+            <Layout>
+              <ProblemDetail />
             </Layout>
           } 
         />

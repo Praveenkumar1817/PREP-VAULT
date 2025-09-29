@@ -1,46 +1,48 @@
+/* src/pages/Auth.module.css */
 .authContainer {
   display: flex;
   justify-content: center;
-  margin-top: 3rem;
+  margin-top: 50px;
 }
 
 .authForm {
   display: flex;
   flex-direction: column;
-  padding: 1.875rem;
-  border-radius: 0.625rem;
-  width: 18.75rem;
+  padding: 30px;
+  border-radius: 10px;
+  width: 300px;
   background-color: #000000;
 }
 
 .authHeading {
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 20px;
   color: #ffffff;
 }
 
 .authLabel {
-  margin-bottom: 0.3125rem;
+  margin-bottom: 5px;
   font-weight: bold;
   color: #ffffff;
 }
 
 .authInput {
-  padding: 0.5rem;
-  margin-bottom: 0.9375rem;
-  border-radius: 0.25rem;
+  padding: 8px;
+  margin-bottom: 15px;
+  border-radius: 4px;
   border: 1px solid #96969f;
   background-color: #ffffff;
 }
 
 .authButton {
-  padding: 0.625rem;
+  padding: 10px;
   background-color: #007bff;
   color: #ffffff;
   border: none;
-  border-radius: 0.3125rem;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 16px;
 }
 
 .authButton.register {
@@ -48,7 +50,7 @@
 }
 
 .authLink {
-  margin-top: 0.625rem;
+  margin-top: 10px;
   color: #ffffff;
   text-align: center;
 }
@@ -56,4 +58,5 @@
 .authLink a {
   color: #007bff;
   text-decoration: underline;
+  cursor: pointer;
 }
