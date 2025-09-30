@@ -15,19 +15,25 @@
 }
 
 .backButton {
-  background: none;
-  border: none;
+  background: #3b82f6;
+  border: 1px solid #2563eb;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.75rem 1rem;
   font-size: 1rem;
-  color: #94a3b8;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .backButton:hover {
-  color: #f8fafc;
+  background: #2563eb;
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .pageTitle {
@@ -134,10 +140,17 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  background: #475569;
+  color: #f8fafc;
+  border: 1px solid #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .statusButtons button:hover {
   transform: translateY(-1px);
+  background: #64748b;
+  border-color: #94a3b8;
 }
 
 .tagsList {
@@ -270,6 +283,62 @@
   border-radius: 0.5rem;
   font-weight: 600;
   font-size: 0.95rem;
+  background: #3b82f6;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.formActions button:hover {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.formActions button.secondary {
+  background: #475569;
+  color: #f8fafc;
+  border-color: #64748b;
+}
+
+.formActions button.secondary:hover {
+  background: #64748b;
+  border-color: #94a3b8;
+}
+
+/* Action buttons styling */
+.actionButtons button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: #3b82f6;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButtons button:hover {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* Outline button variant for action buttons */
+.actionButtons button[data-variant="outline"],
+.actionButtons button.outline {
+  background: transparent;
+  color: #f8fafc;
+  border: 2px solid #64748b;
+}
+
+.actionButtons button[data-variant="outline"]:hover,
+.actionButtons button.outline:hover {
+  background: #64748b;
+  border-color: #94a3b8;
+  color: #ffffff;
 }
 
 .loading,

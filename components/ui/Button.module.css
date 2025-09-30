@@ -43,13 +43,15 @@
 }
 
 .outline {
-  border: 1px solid var(--gray-300);
-  color: var(--gray-700);
+  border: 2px solid #64748b;
+  color: #f8fafc;
   background-color: transparent;
 }
 
 .outline:hover {
-  background-color: var(--gray-100);
+  background-color: #64748b;
+  border-color: #94a3b8;
+  color: #ffffff;
 }
 
 .ghost {

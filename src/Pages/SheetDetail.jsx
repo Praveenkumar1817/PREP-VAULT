@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import styles from "./SheetDetail.module.css";
 
+
 // Helper function to normalize topics
 const normalizeTopic = (topic) => {
   if (!topic) return "";
@@ -62,7 +63,7 @@ export default function SheetDetail() {
         }));
         setProblems(sheetProblems);
       } catch (err) {
-        console.error("Error fetching sheet data:", err);
+        console.error("Error fetching sheet ", err);
         navigate("/sheets");
       }
     };
@@ -185,18 +186,13 @@ export default function SheetDetail() {
   return (
     <div className={styles.sheetDetail}>
       <div className={styles.header}>
-        <div className={styles.sheetInfo}>
-          <button 
-            onClick={() => navigate("/sheets")}
-            className={styles.backButton}
-          >
-            ← Back to Sheets
-          </button>
-          <h1 className={styles.sheetTitle}>{sheet.name}</h1>
-          {sheet.description && (
-            <p className={styles.sheetDescription}>{sheet.description}</p>
-          )}
-        </div>
+        <button 
+          onClick={() => navigate("/sheets")}
+          className={styles.backButton}
+        >
+          ← Back to Sheets
+        </button>
+        <h1 className={styles.sheetTitle}>{sheet.name}</h1>
         <div className={styles.progressContainer}>
           <div className={styles.progressIcon}>
             <div className={styles.progressNumber}>
@@ -279,7 +275,7 @@ export default function SheetDetail() {
                 <label>Topic</label>
                 <Input
                   type="text"
-                  placeholder="e.g., Sorting, Arrays, Dynamic Programming"
+                  placeholder="e.g., Graphs, Arrays, Dynamic Programming"
                   className={styles.formInput}
                   value={newProblem.topic}
                   onChange={(e) => setNewProblem({ ...newProblem, topic: e.target.value })}
@@ -350,62 +346,63 @@ export default function SheetDetail() {
         )}
       </div>
 
-      {/* Problem List - Simplified */}
-      <div className={styles.problemListHeader}>
-        <h2 className={styles.problemListTitle}>Questions ({filteredProblems.length})</h2>
-      </div>
-      
-      {filteredProblems.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p>No questions in this sheet yet.</p>
-          <Button onClick={() => setShowAddForm(true)}>
-            Add Your First Question
-          </Button>
-        </div>
-      ) : (
-        <div className={styles.problemGrid}>
-          {filteredProblems.map((p) => (
-            <div key={p.id} className={styles.problemCard}>
-              <div className={styles.problemCardContent}>
-                <div className={styles.problemInfo}>
-                  <h3 className={styles.problemTitle}>
-                    <a 
-                      href={p.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={styles.problemLink}
+      {/* Questions Section */}
+      <div className={styles.questionsSection}>
+        <h2 className={styles.questionsTitle}>Questions ({filteredProblems.length})</h2>
+        
+        {filteredProblems.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>No questions in this sheet yet.</p>
+            <Button onClick={() => setShowAddForm(true)}>
+              Add Your First Question
+            </Button>
+          </div>
+        ) : (
+          <div className={styles.questionsGrid}>
+            {filteredProblems.map((p) => (
+              <div key={p.id} className={styles.questionCard}>
+                <div className={styles.questionContent}>
+                  <div className={styles.questionHeader}>
+                    <h3 className={styles.questionTitle}>
+                      <a 
+                        href={p.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={styles.questionLink}
+                      >
+                        {p.title || "Untitled Problem"}
+                      </a>
+                    </h3>
+                    <div className={styles.questionMeta}>
+                      <span className={styles.topicBadge}>
+                        {p.topic || "No topic"}
+                      </span>
+                      <span className={`${styles.difficultyBadge} ${p.difficulty.toLowerCase()}`}>
+                        {p.difficulty}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className={styles.questionActions}>
+                    <button 
+                      className={styles.viewButton}
+                      onClick={() => navigate(`/problems/${p.id}`)}
                     >
-                      {p.title || "Untitled Problem"}
-                    </a>
-                  </h3>
-                  <div className={styles.problemMeta}>
-                    <span className={styles.topic}>{p.topic || "No topic"}</span>
-                    <span className={`${styles.difficultyBadge} ${p.difficulty.toLowerCase()}`}>
-                      {p.difficulty}
-                    </span>
+                      View Details
+                    </button>
+                    <button 
+                      className={styles.deleteButton}
+                      onClick={() => deleteProblem(p.id)}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
-                
-                <div className={styles.problemActions}>
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/problems/${p.id}`)}
-                  >
-                    View Details
-                  </Button>
-                  <button 
-                    className={styles.deleteButton}
-                    onClick={() => deleteProblem(p.id)}
-                  >
-                    🗑️
-                  </button>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
