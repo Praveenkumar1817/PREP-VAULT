@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui';
+import { useAuth } from '../src/context/AuthContext';
 import styles from './Navbar.module.css';
 
 export default function Navbar({ onLogout }) {
+  const { isAdmin } = useAuth();
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.navContent}>
@@ -11,6 +14,12 @@ export default function Navbar({ onLogout }) {
           <Link to="/home" className={styles.logo}>PrepVault</Link>
           <Link to="/sheets" className={styles.navLink}>Sheets</Link>
           <Link to="/analytics" className={styles.navLink}>Analytics</Link>
+          <Link to="/profile" className={styles.navLink}>Profile</Link>
+          {isAdmin && (
+            <Link to="/admin/analytics" className={styles.navLink} style={{ color: '#d4af37' }}>
+              Admin Panel
+            </Link>
+          )}
         </div>
         <div>
           <Button variant="ghost" onClick={onLogout}>Logout</Button>

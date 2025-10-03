@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { db, auth } from "../firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { Card, CardContent } from "../../components/ui/Card";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import styles from "./Analytics.module.css";
 
 export default function Analytics() {
   const [stats, setStats] = useState({ solved: 0, attempted: 0, unsolved: 0 });
+  const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,6 +23,16 @@ export default function Analytics() {
       try {
         setLoading(true);
         setError(null);
+        
+        // Fetch user profile first
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserName(userData.name || auth.currentUser.email.split('@')[0]);
+        } else {
+          setUserName(auth.currentUser.email.split('@')[0]);
+        }
         
         const problemsRef = collection(db, "problems");
         // Query only problems belonging to the current user
@@ -80,7 +91,19 @@ export default function Analytics() {
 
   return (
     <div className={styles.analytics}>
-      <h2 className={styles.pageTitle}>Analytics 📊</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <h2 className={styles.pageTitle}>Analytics 📊{userName && ` - ${userName}`}</h2>
+        {userName && !userName.includes('@') && userName !== auth.currentUser?.email?.split('@')[0] && (
+          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+            Welcome back, {userName}! 👋
+          </p>
+        )}
+        {(!userName || userName === auth.currentUser?.email?.split('@')[0]) && (
+          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+            Complete your <a href="/profile" style={{ color: '#3b82f6', textDecoration: 'none' }}>profile</a> to show your name on leaderboards
+          </p>
+        )}
+      </div>
 
       <div className={styles.statsGrid}>
         <Card className={`${styles.statCard} ${styles.solved}`}>

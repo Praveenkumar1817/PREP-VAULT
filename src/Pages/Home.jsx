@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
@@ -10,6 +10,8 @@ import styles from "./Home.module.css";
 export default function Home() {
   const [stats, setStats] = useState({ solved: 0, attempted: 0, unsolved: 0 });
   const [recent, setRecent] = useState([]);
+  const [profileComplete, setProfileComplete] = useState(true);
+  const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -26,6 +28,17 @@ export default function Home() {
       try {
         setLoading(true);
         setError(null);
+        
+        // Check user profile completion
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserName(userData.name || "");
+          setProfileComplete(!!userData.name && !!userData.name.trim());
+        } else {
+          setProfileComplete(false);
+        }
         
         const problemsRef = collection(db, "problems");
         const q = query(problemsRef, where("user", "==", auth.currentUser.uid));
@@ -95,6 +108,50 @@ export default function Home() {
             <Link to="/analytics"><Button variant="outline">View Analytics</Button></Link>
           </div>
         </header>
+
+        {/* Profile Completion Banner */}
+        {!loading && !profileComplete && (
+          <div style={{
+            backgroundColor: '#fef3c7',
+            border: '1px solid #f59e0b',
+            borderRadius: '8px',
+            padding: '16px',
+            margin: '20px 0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <h3 style={{ margin: '0 0 8px 0', color: '#92400e', fontSize: '16px' }}>
+                👋 Complete Your Profile
+              </h3>
+              <p style={{ margin: 0, color: '#92400e', fontSize: '14px' }}>
+                Add your name and details to appear properly on leaderboards and connect with other users.
+              </p>
+            </div>
+            <Link to="/profile">
+              <Button style={{ backgroundColor: '#f59e0b', color: 'white', border: 'none' }}>
+                Complete Profile
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {/* Welcome Message for Complete Profiles */}
+        {!loading && profileComplete && userName && (
+          <div style={{
+            backgroundColor: '#d1fae5',
+            border: '1px solid #10b981',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            margin: '20px 0',
+            textAlign: 'center'
+          }}>
+            <p style={{ margin: 0, color: '#065f46', fontSize: '16px' }}>
+              Welcome back, <strong>{userName}</strong>! 👋 Ready to solve some problems?
+            </p>
+          </div>
+        )}
 
         {/* Loading and Error States */}
         {loading && (
