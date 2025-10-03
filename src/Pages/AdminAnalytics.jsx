@@ -26,26 +26,21 @@ export default function AdminAnalytics() {
         setLoading(true);
         setError(null);
         
-        // Check if user is authenticated and is admin
         if (!currentUser || !isAdmin) {
           setError("Admin access required");
           setLoading(false);
           return;
         }
         
-        // Fetch all problems to calculate user statistics
         const problemsRef = collection(db, "problems");
         const problemsSnapshot = await getDocs(problemsRef);
         
-        // Fetch all user profiles to get names
         const usersRef = collection(db, "users");
         const usersSnapshot = await getDocs(usersRef);
         
-        // Create user profiles map
         const userProfiles = {};
         usersSnapshot.docs.forEach((doc) => {
           const userData = doc.data();
-          // Debug log to see what data we're getting
           console.log("User profile data for", doc.id, ":", userData);
           console.log("LinkedIn URL:", userData.linkedinUrl, "Contact:", userData.contact);
           
@@ -59,7 +54,6 @@ export default function AdminAnalytics() {
           };
         });
         
-        // Calculate user statistics for leaderboard
         const userStats = {};
         let totalSolved = 0, totalAttempted = 0, totalUnsolved = 0;
         const difficultyStats = { Easy: 0, Medium: 0, Hard: 0 };
@@ -70,13 +64,11 @@ export default function AdminAnalytics() {
           const userEmail = data.userEmail;
           const userProfile = userProfiles[userId];
           
-          // Debug log for the first few problems
           if (Object.keys(userStats).length < 3) {
             console.log("Problem data:", { userId, userEmail, userProfile, problemData: data });
           }
           
           if (!userStats[userId]) {
-            // Use profile email if available, otherwise fall back to problem data, then auth email
             const finalEmail = userProfile?.email || userEmail || "Unknown User";
             const finalName = userProfile?.name || (finalEmail && finalEmail !== "Unknown User" ? finalEmail.split('@')[0] : "Unknown User");
             
@@ -107,13 +99,11 @@ export default function AdminAnalytics() {
             totalUnsolved++;
           }
           
-          // Count difficulty distribution
           if (data.difficulty && difficultyStats.hasOwnProperty(data.difficulty)) {
             difficultyStats[data.difficulty]++;
           }
         });
         
-        // Convert to leaderboard array and sort by solved problems
         const leaderboardData = Object.entries(userStats)
           .map(([userId, stats]) => ({
             userId,
@@ -121,15 +111,13 @@ export default function AdminAnalytics() {
             successRate: stats.total > 0 ? ((stats.solved / stats.total) * 100).toFixed(1) : 0
           }))
           .sort((a, b) => {
-            // Sort by solved problems first, then by success rate
             if (b.solved !== a.solved) return b.solved - a.solved;
             return parseFloat(b.successRate) - parseFloat(a.successRate);
           })
-          .slice(0, 10); // Top 10 users
+          .slice(0, 10);
         
         setLeaderboard(leaderboardData);
         
-        // Set global statistics
         setGlobalStats({
           totalUsers: Object.keys(userStats).length,
           totalProblems: problemsSnapshot.docs.length,
@@ -138,7 +126,6 @@ export default function AdminAnalytics() {
           totalUnsolved
         });
         
-        // Set problem difficulty statistics for chart
         setProblemStats([
           { name: "Easy", value: difficultyStats.Easy },
           { name: "Medium", value: difficultyStats.Medium },
@@ -211,7 +198,6 @@ export default function AdminAnalytics() {
     <div className={styles.analytics}>
       <h2 className={styles.pageTitle}>Admin Analytics Dashboard 🎯</h2>
 
-      {/* Global Statistics */}
       <div className={styles.statsGrid}>
         <Card className={`${styles.statCard} ${styles.solved}`}>
           <CardContent>
@@ -241,7 +227,6 @@ export default function AdminAnalytics() {
         </Card>
       </div>
 
-      {/* Leaderboard Section */}
       <div style={{ marginTop: '40px' }}>
         <h3 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>
           🏆 Top Performers Leaderboard
@@ -319,9 +304,7 @@ export default function AdminAnalytics() {
         </Card>
       </div>
 
-      {/* Charts Section */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '40px' }}>
-        {/* Problem Status Distribution */}
         <Card>
           <CardContent>
             <h3 style={{ marginBottom: '20px', textAlign: 'center' }}>Problem Status Distribution</h3>
@@ -345,7 +328,6 @@ export default function AdminAnalytics() {
           </CardContent>
         </Card>
 
-        {/* Problem Difficulty Distribution */}
         <Card>
           <CardContent>
             <h3 style={{ marginBottom: '20px', textAlign: 'center' }}>Problem Difficulty Distribution</h3>
@@ -368,7 +350,6 @@ export default function AdminAnalytics() {
         </Card>
       </div>
 
-      {/* Performance Insights */}
       <div style={{ marginTop: '40px' }}>
         <h3 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: 'bold' }}>
           📊 Platform Insights

@@ -29,7 +29,6 @@ export default function Home() {
         setLoading(true);
         setError(null);
         
-        // Check user profile completion
         const userDocRef = doc(db, "users", auth.currentUser.uid);
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
@@ -97,7 +96,6 @@ export default function Home() {
   return (
     <div className={styles.home}>
       <div className={styles.container}>
-        {/* Header */}
         <header className={styles.header}>
           <div className={styles.headerContent}>
             <h1 className={styles.headerTitle}>PrepVault</h1>
@@ -109,7 +107,6 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Profile Completion Banner */}
         {!loading && !profileComplete && (
           <div style={{
             backgroundColor: '#fef3c7',
@@ -137,7 +134,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Welcome Message for Complete Profiles */}
         {!loading && profileComplete && userName && (
           <div style={{
             backgroundColor: '#d1fae5',
@@ -153,7 +149,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Loading and Error States */}
         {loading && (
           <div className={styles.loadingContainer}>
             <p>Loading your dashboard...</p>
@@ -168,8 +163,7 @@ export default function Home() {
 
         {!loading && !error && (
           <>
-            {/* Stats */}
-            <div className={styles.statsGrid}>
+            <div className={styles.stats}>
               <Card className={styles.statCard}>
                 <CardContent>
                   <p className={styles.statLabel}>Solved</p>
@@ -192,7 +186,6 @@ export default function Home() {
 
             {/* Recent Problems + Quick Add */}
             <div className={styles.contentGrid}>
-              {/* Recent Problems */}
               <div className={styles.recentProblems}>
                 <div className={styles.recentHeader}>
                   <h2 className={styles.recentTitle}>Recent Problems</h2>
@@ -236,7 +229,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Quick Add */}
               <div className={styles.quickAdd}>
                 <Card className={styles.quickAddCard}>
                   <CardContent>

@@ -1,47 +1,33 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Function to check if user is admin
     function isAdmin() {
       return request.auth != null && 
              (request.auth.token.email == 'admin@prepvault.com' ||
               request.auth.token.email == 'praveenkumar1817@gmail.com');
     }
     
-    // Function to check if user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
     
-    // Problems collection rules
     match /problems/{problemId} {
-      // Users can read and write their own problems
       allow read, write: if isAuthenticated() && request.auth.uid == resource.data.user;
-      // Admins can read all problems
       allow read: if isAdmin();
-      // Allow creation if user is authenticated and setting their own uid
       allow create: if isAuthenticated() && request.auth.uid == request.resource.data.user;
     }
     
-    // Users collection rules
     match /users/{userId} {
-      // Users can read and write their own profile data
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
-      // Users can create their own profile
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      // Admins can read all user data
       allow read: if isAdmin();
     }
     
-    // Sheets collection rules (if you have one)
     match /sheets/{sheetId} {
-      // Allow read access to authenticated users
       allow read: if isAuthenticated();
-      // Allow write access to admins
       allow write: if isAdmin();
     }
     
-    // Default rule for other collections - restrict access
     match /{document=**} {
       allow read, write: if false;
     }

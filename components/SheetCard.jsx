@@ -1,4 +1,3 @@
-// src/components/SheetCard.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "./ui/Card";
@@ -19,7 +18,7 @@ export default function SheetCard({ sheet, problemCount, solvedCount, onDelete }
       <CardContent>
         <div className={styles.sheetHeader}>
           <h3 className={styles.sheetTitle}>{sheet.name}</h3>
-          <p className={styles.sheetDescription}>{sheet.description || "\u00A0"}</p> {/* Non-breaking space for empty description */}
+          <p className={styles.sheetDescription}>{sheet.description || "\u00A0"}</p>
         </div>
         
         <div className={styles.sheetStats}>

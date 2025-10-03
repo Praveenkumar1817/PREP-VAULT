@@ -86,7 +86,9 @@ export default function ProblemCard({ problem, updateStatus, onDelete }) {
   };
 
   // Get current status for display
-  const currentStatus = editing ? formData.status : problem.status;
+  const [editMode, setEditMode] = useState(false);
+
+  const currentStatus = problem.status || "Unsolved";
 
   // Status symbols
   const getStatusSymbol = (status) => {
@@ -230,8 +232,7 @@ export default function ProblemCard({ problem, updateStatus, onDelete }) {
           )}
         </>
       ) : (
-        // Edit Mode
-        <div className={styles.editForm}>
+          <div className={styles.editForm}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>Title *</label>
             <input

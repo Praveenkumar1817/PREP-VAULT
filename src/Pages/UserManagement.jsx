@@ -18,22 +18,18 @@ export default function UserManagement() {
         setLoading(true);
         setError(null);
         
-        // Check if user is authenticated and is admin
         if (!currentUser || !isAdmin) {
           setError("Admin access required");
           setLoading(false);
           return;
         }
         
-        // Fetch all problems to get user information
         const problemsRef = collection(db, "problems");
         const problemsSnapshot = await getDocs(problemsRef);
         
-        // Fetch all user profiles to get names
         const usersRef = collection(db, "users");
         const usersSnapshot = await getDocs(usersRef);
         
-        // Create user profiles map
         const userProfiles = {};
         usersSnapshot.docs.forEach((doc) => {
           const userData = doc.data();
@@ -48,7 +44,6 @@ export default function UserManagement() {
           };
         });
         
-        // Aggregate user data
         const userStats = {};
         
         problemsSnapshot.docs.forEach((doc) => {
@@ -84,13 +79,11 @@ export default function UserManagement() {
             userStats[userId].unsolved++;
           }
           
-          // Update last activity if this problem is more recent
           if (data.createdAt && data.createdAt > userStats[userId].lastActivity) {
             userStats[userId].lastActivity = data.createdAt;
           }
         });
         
-        // Convert to array and sort by total problems
         const usersArray = Object.entries(userStats)
           .map(([userId, stats]) => ({
             userId,

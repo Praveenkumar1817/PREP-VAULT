@@ -28,7 +28,6 @@ export default function AdminLoginForm() {
       );
       const user = userCredential.user;
       
-      // Check if user is admin after login
       const adminEmails = ["admin@prepvault.com", "praveenkumar1817@gmail.com"];
       const isUserAdmin = adminEmails.includes(user.email);
       

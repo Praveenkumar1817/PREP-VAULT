@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -25,7 +24,6 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Regular User Routes */}
           <Route path="/" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
           <Route 
@@ -89,7 +87,6 @@ function App() {
             } 
           />
           
-          {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLoginForm />} />
           <Route path="/admin/debug" element={<AdminDebug />} />
           <Route 

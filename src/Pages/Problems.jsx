@@ -37,13 +37,11 @@ export default function Problems() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch sheets and problems
   useEffect(() => {
     const fetchData = async () => {
       if (!auth.currentUser) return;
 
       try {
-        // Fetch sheets
         const sheetsRef = collection(db, "sheets");
         const sheetsQuery = query(sheetsRef, where("user", "==", auth.currentUser.uid));
         const sheetsSnapshot = await getDocs(sheetsQuery);
@@ -53,12 +51,10 @@ export default function Problems() {
         }));
         setSheets(userSheets);
 
-        // Set first sheet as active if available
         if (userSheets.length > 0 && !activeSheet) {
           setActiveSheet(userSheets[0]);
         }
 
-        // Fetch problems for active sheet
         if (activeSheet) {
           const problemsRef = collection(db, "problems");
           const problemsQuery = query(
@@ -82,7 +78,6 @@ export default function Problems() {
     fetchData();
   }, [activeSheet]);
 
-  // Create new sheet
   const createSheet = async () => {
     if (!newSheet.name.trim()) {
       alert("Please enter a sheet name");
@@ -119,7 +114,6 @@ export default function Problems() {
     }
   };
 
-  // Add problem to active sheet
   const addProblem = async () => {
     if (!newProblem.title.trim()) {
       alert("Please enter a problem title");
@@ -158,7 +152,6 @@ export default function Problems() {
       const docRef = await addDoc(problemsRef, problemData);
       setProblems(prev => [...prev, { id: docRef.id, ...problemData }]);
       
-      // Reset form
       setNewProblem({
         title: "",
         difficulty: "Easy",
@@ -178,7 +171,6 @@ export default function Problems() {
     }
   };
 
-  // Update problem status
   const updateStatus = async (id, status) => {
     if (!auth.currentUser) return;
 
@@ -194,14 +186,12 @@ export default function Problems() {
     }
   };
 
-  // Delete sheet
   const deleteSheet = async (sheetId) => {
     if (!window.confirm("Are you sure you want to delete this sheet? All problems in it will be deleted too.")) {
       return;
     }
 
     try {
-      // Delete all problems in the sheet first
       const problemsRef = collection(db, "problems");
       const problemsQuery = query(
         problemsRef,
@@ -215,10 +205,8 @@ export default function Problems() {
       );
       await Promise.all(deletePromises);
 
-      // Delete the sheet
       await deleteDoc(doc(db, "sheets", sheetId));
       
-      // Update local state
       const updatedSheets = sheets.filter(s => s.id !== sheetId);
       setSheets(updatedSheets);
       
@@ -253,7 +241,6 @@ export default function Problems() {
         </Button>
       </div>
 
-      {/* Sheets Navigation */}
       <div className={styles.sheetsNav}>
         {sheets.length === 0 ? (
           <p className={styles.noSheets}>No sheets created yet.</p>
@@ -291,7 +278,6 @@ export default function Problems() {
         )}
       </div>
 
-      {/* Problems Section */}
       {activeSheet && (
         <>
           <div className={styles.sheetHeader}>
@@ -331,7 +317,6 @@ export default function Problems() {
         </>
       )}
 
-      {/* Create Sheet Modal */}
       {showSheetModal && (
         <div className={styles.modalOverlay} onClick={() => setShowSheetModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -382,7 +367,6 @@ export default function Problems() {
         </div>
       )}
 
-      {/* Add Problem Modal */}
       {showProblemModal && (
         <div className={styles.modalOverlay} onClick={() => setShowProblemModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>

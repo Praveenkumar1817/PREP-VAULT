@@ -18,14 +18,12 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       if (user) {
-        // Check if user is admin
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
             setIsAdmin(userData.role === "admin");
           } else {
-            // For predefined admin emails
             const adminEmails = ["admin@prepvault.com", "praveenkumar1817@gmail.com"];
             setIsAdmin(adminEmails.includes(user.email));
           }

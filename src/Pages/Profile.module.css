@@ -114,7 +114,6 @@
   cursor: not-allowed;
 }
 
-/* Profile Preview Styles */
 .previewCard {
   border: 2px solid #e5e7eb;
   background-color: #f8fafc;
@@ -176,7 +175,6 @@
   background-color: #ecfdf5;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .profile {
     padding: 15px;
@@ -196,7 +194,6 @@
   }
 }
 
-/* Form Input Styling */
 .profileForm input,
 .profileForm textarea {
   padding: 12px;
@@ -217,7 +214,6 @@
   border-color: #dc2626;
 }
 
-/* Skills Tags (if you want to style them later) */
 .skillsPreview {
   display: flex;
   flex-wrap: wrap;

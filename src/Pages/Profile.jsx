@@ -70,10 +70,9 @@ export default function Profile() {
         email: currentUser.email,
         uid: currentUser.uid,
         updatedAt: new Date(),
-        createdAt: new Date() // This will only be set on first creation
+        createdAt: new Date()
       };
 
-      // Use setDoc with merge option to create or update
       await setDoc(doc(db, "users", currentUser.uid), profileData, { merge: true });
       
       setMessage("Profile updated successfully! 🎉");
@@ -113,7 +112,6 @@ export default function Profile() {
       <Card className={styles.profileCard}>
         <CardContent>
           <form onSubmit={handleSubmit} className={styles.profileForm}>
-            {/* Basic Information */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Basic Information</h3>
               
@@ -153,7 +151,6 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Professional Information */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Professional Information</h3>
               
@@ -208,7 +205,6 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* About Section */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>About Me</h3>
               
@@ -237,7 +233,6 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      {/* Profile Preview */}
       {profile.name && (
         <Card className={styles.previewCard}>
           <CardContent>

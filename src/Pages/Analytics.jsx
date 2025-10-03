@@ -13,7 +13,6 @@ export default function Analytics() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Check if user is authenticated
       if (!auth.currentUser) {
         console.warn("No authenticated user, cannot fetch analytics");
         setLoading(false);
@@ -24,7 +23,6 @@ export default function Analytics() {
         setLoading(true);
         setError(null);
         
-        // Fetch user profile first
         const userDocRef = doc(db, "users", auth.currentUser.uid);
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
@@ -43,11 +41,9 @@ export default function Analytics() {
 
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
-          // Status validation
           if (data.status === "Solved") solved++;
           else if (data.status === "Attempted") attempted++;
           else if (data.status === "Unsolved") unsolved++;
-          // Handle any other status as "Unsolved" for safety
         });
 
         setStats({ solved, attempted, unsolved });
@@ -70,7 +66,6 @@ export default function Analytics() {
 
   const COLORS = ["#22c55e", "#facc15", "#ef4444"];
 
-  // Handle loading and error states
   if (loading) {
     return (
       <div className={styles.analytics}>
